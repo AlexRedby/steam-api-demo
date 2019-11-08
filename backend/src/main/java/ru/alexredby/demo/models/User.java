@@ -5,15 +5,19 @@ import com.ibasco.agql.protocols.valve.steam.webapi.interfaces.SteamUser;
 import com.ibasco.agql.protocols.valve.steam.webapi.pojos.SteamPlayerProfile;
 import lombok.Data;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.Id;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 
-//@Entity
+@Entity
 @Data
 public class User {
     /** 64bit Steam Id */
+    @Id
+    @Column(nullable = false, updatable = false)
     private String id;
 
     // TODO: make enum
@@ -31,13 +35,6 @@ public class User {
     /** Nickname */
     private String name;
 
-    // Who cares...
-    //private long lastLogOff;
-
-    // Steam id could use instead storing link
-    // https://steamcommunity.com/profiles/{steam_id}/
-    //private String profileUrl;
-
     /**
      * Steam Url to avatar image
      * For 32x32 avatar use this Url
@@ -46,12 +43,6 @@ public class User {
      */
     // For medium/full image just add "_medium" and "_full" accordingly before ".jpg"
     private String avatarUrl;
-    //private String avatarMediumUrl;
-    //private String avatarFullUrl;
-
-    // No need to store
-    // 0 - Offline, 1 - Online, 2 - Busy, 3 - Away, 4 - Snooze, 5 - looking to trade, 6 - looking to play
-    //private int personaState;
 
     /**
      * The player's primary group, as configured in their Steam Community profile
@@ -75,5 +66,17 @@ public class User {
         this.primaryGroupId = profile.getPrimaryGroupId();
         // TODO: change it
         this.timeCreated = LocalDateTime.ofInstant(Instant.ofEpochSecond(profile.getTimeCreated()), ZoneId.of("Z"));
+    }
+
+    public String getProfileUrl() {
+        return "https://steamcommunity.com/profiles/" + id;
+    }
+
+    public String getMediumAvatar() {
+        return String.join("_medium.", avatarUrl.split("."));
+    }
+
+    public String getFullAvatar() {
+        return String.join("_full.", avatarUrl.split("."));
     }
 }
