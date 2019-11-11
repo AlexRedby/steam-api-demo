@@ -2,8 +2,20 @@ server:
   port: 8666
 
 spring:
+  # Database setting
   datasource:
     url: jdbc:h2:file:C:\steamServiceDB
     username: Test
     password: 1234
     driver-class-name: org.h2.Driver
+  # Dev settings for jpa
+  jpa:
+    show-sql: true
+    hibernate:
+      # Recreating DB schema every restart ("create")
+      # Set "none" after testing
+      ddl-auto: create
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+        connection: UTF-8

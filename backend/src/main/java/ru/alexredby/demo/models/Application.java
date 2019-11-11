@@ -3,11 +3,11 @@ package ru.alexredby.demo.models;
 import com.ibasco.agql.protocols.valve.steam.webapi.pojos.SteamApp;
 import lombok.Data;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
+import javax.persistence.*;
 
-//@Entity
+// TODO: more data such achievements
+@Entity
+@Table(name = "APPLICATIONS")
 @Data
 public class Application {
     @Id
