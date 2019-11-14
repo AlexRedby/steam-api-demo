@@ -1,4 +1,4 @@
-package ru.alexredby.demo.models;
+package ru.alexredby.demo.persistance.models;
 
 import javax.annotation.Nullable;
 

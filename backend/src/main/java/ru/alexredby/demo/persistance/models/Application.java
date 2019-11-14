@@ -1,13 +1,15 @@
-package ru.alexredby.demo.models;
+package ru.alexredby.demo.persistance.models;
 
 import com.ibasco.agql.protocols.valve.steam.webapi.pojos.SteamApp;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 
 // TODO: more data such achievements
 @Entity
 @Table(name = "APPLICATIONS")
+@NoArgsConstructor
 @Data
 public class Application {
     @Id

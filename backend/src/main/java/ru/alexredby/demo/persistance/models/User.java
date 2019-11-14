@@ -1,14 +1,17 @@
-package ru.alexredby.demo.models;
+package ru.alexredby.demo.persistance.models;
 
 import com.ibasco.agql.protocols.valve.steam.webapi.pojos.SteamPlayerProfile;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
 
+// TODO: make common class with id mb? research this question
 @Entity
 @Table(name = "USERS")
+@NoArgsConstructor
 @Data
 public class User {
     /** 64bit Steam Id */
@@ -75,13 +78,29 @@ public class User {
      * @return url to 64x64 user's avatar
      */
     public String getMediumAvatar() {
-        return String.join("_medium.", smallAvatar.split("."));
+        return String.join("_medium.", splitByLast(smallAvatar, "."));
     }
 
     /**
      * @return url to 184x184 user's avatar
      */
     public String getFullAvatar() {
-        return String.join("_full.", smallAvatar.split("."));
+        return String.join("_full.", splitByLast(smallAvatar, "."));
+    }
+
+    /**
+     * Splits given string to 2 substrings by splitter on last position of string
+     *
+     * @param str target string to split
+     * @param splitter substring which should be found in given string
+     * @return array of 2 string without splitter
+     */
+    // TODO: make various checks + move it somewhere
+    private String[] splitByLast(String str, String splitter) {
+        int indexOfLast = str.lastIndexOf(splitter);
+        return new String[] {
+                str.substring(0, indexOfLast),
+                str.substring(indexOfLast + 1)
+        };
     }
 }
