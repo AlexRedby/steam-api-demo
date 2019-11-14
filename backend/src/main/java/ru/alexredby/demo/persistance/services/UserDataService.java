@@ -6,6 +6,7 @@ import ru.alexredby.demo.persistance.models.User;
 import ru.alexredby.demo.persistance.repositories.UserRepository;
 
 import javax.transaction.Transactional;
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 @Service
@@ -23,7 +24,7 @@ public class UserDataService {
         return userRepository.findAll();
     }
 
-    public User save(User user) {
+    public User save(@NotNull User user) {
         return userRepository.save(user);
     }
 }
