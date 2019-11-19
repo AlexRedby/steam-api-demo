@@ -17,16 +17,16 @@ import java.util.concurrent.ExecutionException;
 public class SteamExternalDataService {
 
     // It should be created only in one place, so it could be a bottleneck. Pay attention!
-    private SteamWebApiClient steamWebApiClient;
+    //private SteamWebApiClient steamWebApiClient;
     private SteamUser steamUser;
 
     private UserDataService userDataService;
 
     @Autowired
-    public SteamExternalDataService(UserDataService userDataService) {
+    public SteamExternalDataService(UserDataService userDataService, SteamWebApiClient steamWebApiClient) {
         this.userDataService = userDataService;
         // TODO: mb relocate it in some Bean???
-        this.steamWebApiClient = new SteamWebApiClient(ApiTokenClass.API_TOKEN);
+        //this.steamWebApiClient = steamWebApiClient;
         // TODO: Don't know where it should be created... mb relocate too
         this.steamUser = new SteamUser(steamWebApiClient);
     }
