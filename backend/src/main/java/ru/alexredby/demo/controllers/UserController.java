@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.alexredby.demo.persistance.models.User;
 import ru.alexredby.demo.persistance.services.UserDataService;
+import ru.alexredby.demo.services.SteamExternalDataService;
 
 import java.util.List;
 
@@ -14,15 +15,18 @@ public class UserController {
 
     private UserDataService userDataService;
 
+    private SteamExternalDataService steamExternalDataService;
+
     @Autowired
-    public UserController(UserDataService userDataService) {
+    public UserController(UserDataService userDataService, SteamExternalDataService steamExternalDataService) {
         this.userDataService = userDataService;
+        this.steamExternalDataService = steamExternalDataService;
     }
 
     /**
      * Gives all users from db with status code OK and with status NoContent if no one user was found
      *
-     * @return list of users
+     * @return a list of users
      */
     // TODO: add paging
     @GetMapping
@@ -33,16 +37,13 @@ public class UserController {
     }
 
     /**
-     * Update user info from Steam by given Steam id
+     * Update user info from Steam Api by given Steam id
      *
-     * @param userId user Steam id to update
-     * @return updated user
+     * @param userId a user's Steam id to update
+     * @return a updated user
      */
     @PostMapping("update/{userId}")
-    public ResponseEntity<User> updateUser(@PathVariable(value = "userId", required = true) String userId) {
-        // TODO: make service with SteamWebApiClient inside and use it here
-
-        // TODO: replace to proper code
-        return ResponseEntity.ok(new User());
+    public ResponseEntity<User> updateUser(@PathVariable(value = "userId", required = true) long userId) {
+        return ResponseEntity.ok(steamExternalDataService.updateOrCreateUser(userId));
     }
 }

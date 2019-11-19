@@ -3,6 +3,7 @@ package ru.alexredby.demo.persistance.models;
 import com.ibasco.agql.protocols.valve.steam.webapi.pojos.SteamPlayerProfile;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.alexredby.demo.utils.StringUtils;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -45,7 +46,7 @@ public class User {
      * Alias: primaryclanid
      * Visibility in steam: Private
      */
-    private long primaryGroupId;
+    private Long primaryGroupId;
 
     /**
      * The time the player's account was created
@@ -63,8 +64,16 @@ public class User {
         this.nickname = profile.getName();
         this.profileState = profile.getProfileState();
         this.smallAvatar = profile.getProfileUrl();
-        this.primaryGroupId = profile.getPrimaryGroupId();
-        this.timeCreated = Instant.ofEpochSecond(profile.getTimeCreated());
+
+        Long primaryGroupId = null;
+        Instant timeCreated = null;
+        // If profile is public then set private info, otherwise - null
+        if (this.communityVisibilityState == UserVisibility.PUBLIC) {
+            primaryGroupId = profile.getPrimaryGroupId();
+            timeCreated = Instant.ofEpochSecond(profile.getTimeCreated());
+        }
+        this.primaryGroupId = primaryGroupId;
+        this.timeCreated = timeCreated;
     }
 
     /**
@@ -78,29 +87,13 @@ public class User {
      * @return url to 64x64 user's avatar
      */
     public String getMediumAvatar() {
-        return String.join("_medium.", splitByLast(smallAvatar, "."));
+        return String.join("_medium.", StringUtils.splitByLast(smallAvatar, "."));
     }
 
     /**
      * @return url to 184x184 user's avatar
      */
     public String getFullAvatar() {
-        return String.join("_full.", splitByLast(smallAvatar, "."));
-    }
-
-    /**
-     * Splits given string to 2 substrings by splitter on last position of string
-     *
-     * @param str target string to split
-     * @param splitter substring which should be found in given string
-     * @return array of 2 string without splitter
-     */
-    // TODO: make various checks + move it somewhere
-    private String[] splitByLast(String str, String splitter) {
-        int indexOfLast = str.lastIndexOf(splitter);
-        return new String[] {
-                str.substring(0, indexOfLast),
-                str.substring(indexOfLast + 1)
-        };
+        return String.join("_full.", StringUtils.splitByLast(smallAvatar, "."));
     }
 }
