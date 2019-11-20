@@ -2,10 +2,9 @@ package ru.alexredby.demo;
 
 import com.ibasco.agql.protocols.valve.steam.webapi.SteamWebApiClient;
 import com.ibasco.agql.protocols.valve.steam.webapi.interfaces.SteamUser;
-import com.ibasco.agql.protocols.valve.steam.webapi.pojos.SteamPlayerProfile;
+import ru.alexredby.demo.steam.ApiTokenClass;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 
 public class Test {
     public static void main(String[] args) throws IOException {

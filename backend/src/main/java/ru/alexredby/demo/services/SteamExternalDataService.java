@@ -5,7 +5,6 @@ import com.ibasco.agql.protocols.valve.steam.webapi.interfaces.SteamUser;
 import com.ibasco.agql.protocols.valve.steam.webapi.pojos.SteamPlayerProfile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.alexredby.demo.ApiTokenClass;
 import ru.alexredby.demo.persistance.models.User;
 import ru.alexredby.demo.persistance.services.UserDataService;
 
@@ -16,8 +15,6 @@ import java.util.concurrent.ExecutionException;
 @Transactional
 public class SteamExternalDataService {
 
-    // It should be created only in one place, so it could be a bottleneck. Pay attention!
-    //private SteamWebApiClient steamWebApiClient;
     private SteamUser steamUser;
 
     private UserDataService userDataService;
@@ -25,9 +22,7 @@ public class SteamExternalDataService {
     @Autowired
     public SteamExternalDataService(UserDataService userDataService, SteamWebApiClient steamWebApiClient) {
         this.userDataService = userDataService;
-        // TODO: mb relocate it in some Bean???
-        //this.steamWebApiClient = steamWebApiClient;
-        // TODO: Don't know where it should be created... mb relocate too
+        // TODO: Don't know where it should be created... mb relocate?
         this.steamUser = new SteamUser(steamWebApiClient);
     }
 

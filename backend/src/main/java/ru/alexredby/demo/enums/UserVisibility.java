@@ -1,9 +1,9 @@
-package ru.alexredby.demo.persistance.models;
+package ru.alexredby.demo.enums;
 
 import javax.annotation.Nullable;
 
 /**
- * Make connection between Steam Api communityVisibilityState from SteamPlayerProfile and this program
+ * Make connection between Steam Api communityVisibilityState from SteamPlayerProfile and this program.
  *
  * 1 - Private
  * 2 - Friends only
@@ -26,10 +26,10 @@ public enum UserVisibility {
     }
 
     /**
-     * Converts integer code of visibility state, taken from steam api, to enum
+     * Converts integer code of visibility state, taken from steam api, to enum.
      *
-     * @param code is code of visibility state, taken from steam api
-     * @return enum value appropriate to given code, or null if couldn't find matches
+     * @param code is code of visibility state, taken from steam api.
+     * @return enum value appropriate to given code, or null if couldn't find matches.
      */
     @Nullable
     public static UserVisibility fromCode(int code) {

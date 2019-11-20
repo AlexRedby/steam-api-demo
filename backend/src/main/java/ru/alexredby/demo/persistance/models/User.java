@@ -3,6 +3,7 @@ package ru.alexredby.demo.persistance.models;
 import com.ibasco.agql.protocols.valve.steam.webapi.pojos.SteamPlayerProfile;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.alexredby.demo.enums.UserVisibility;
 import ru.alexredby.demo.utils.StringUtils;
 
 import javax.persistence.*;
