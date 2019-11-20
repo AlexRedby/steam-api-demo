@@ -3,11 +3,13 @@ package ru.alexredby.demo.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.alexredby.demo.exceptions.UserNotFoundException;
 import ru.alexredby.demo.persistance.models.User;
 import ru.alexredby.demo.persistance.services.UserDataService;
 import ru.alexredby.demo.services.SteamExternalDataService;
 
 import java.util.List;
+import java.util.concurrent.CompletionException;
 
 @RestController
 @RequestMapping(path = "users", consumes = "application/json")
@@ -43,7 +45,8 @@ public class UserController {
      * @return a updated user
      */
     @PostMapping("update/{userId}")
-    public ResponseEntity<User> updateUser(@PathVariable(value = "userId", required = true) long userId) {
+    public ResponseEntity<User> updateUser(@PathVariable(value = "userId", required = true) long userId)
+            throws UserNotFoundException, CompletionException {
         return ResponseEntity.ok(steamExternalDataService.updateOrCreateUser(userId));
     }
 }

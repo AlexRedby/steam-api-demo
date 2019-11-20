@@ -2,6 +2,7 @@ package ru.alexredby.demo.pojos;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
+import org.springframework.http.HttpStatus;
 
 import java.time.LocalDateTime;
 
@@ -17,4 +18,14 @@ public class ErrorResponse {
     private int status;
     /** Human-readable error message. */
     private String error;
+
+    public ErrorResponse(HttpStatus status, String error) {
+        this(status.value(), error);
+    }
+
+    public ErrorResponse(int status, String error) {
+        this.timestamp = LocalDateTime.now();
+        this.status = status;
+        this.error = error;
+    }
 }
