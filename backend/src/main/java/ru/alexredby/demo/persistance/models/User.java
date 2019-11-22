@@ -9,6 +9,8 @@ import ru.alexredby.demo.utils.StringUtils;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 // TODO: make common class with id mb? research this question
 @Entity
@@ -19,7 +21,7 @@ public class User {
     /** 64bit Steam Id */
     @Id
     @Column(nullable = false, updatable = false)
-    private String id;
+    private Long id;
 
     /** A field that describes the access setting of the profile */
     @Column(nullable = false)
@@ -57,17 +59,45 @@ public class User {
     private Instant timeCreated;
 
     /**
-     * Constructor for convert SteamPlayerProfile from com.ibasco.agql to inner User
+     * Last time when profile was update with all related information
      */
-    public User(@NotNull SteamPlayerProfile profile) {
-        this.id = profile.getSteamId();
+    @Column(nullable = false)
+    private LocalDateTime lastUpdate;
+
+    /**
+     * Constructor for User if known only id
+     * Note: use {@code update()} to insert rest of info later
+     */
+    public User(@NotNull Long id) {
+        this.id = id;
+        this.primaryGroupId = null;
+        this.timeCreated = null;
+        this.lastUpdate = LocalDateTime.MIN;
+    }
+
+    /**
+     * Constructor for convert SteamPlayerProfile from com.ibasco.agql to inner User
+     *
+     * @throws NumberFormatException profile steam id is not long.
+     */
+    public User(@NotNull SteamPlayerProfile profile) throws NumberFormatException {
+        this(Long.parseLong(profile.getSteamId()));
+        update(profile);
+    }
+
+    /**
+     * Updates profile info to new one from {@code profile}
+     *
+     * @param profile to update
+     */
+    public void update(@NotNull SteamPlayerProfile profile) {
         this.communityVisibilityState = UserVisibility.fromCode(profile.getCommunityVisibilityState());
         this.nickname = profile.getName();
         this.profileState = profile.getProfileState();
-        this.smallAvatar = profile.getProfileUrl();
+        this.smallAvatar = profile.getAvatarUrl();
 
-        Long primaryGroupId = null;
-        Instant timeCreated = null;
+        Long primaryGroupId = this.primaryGroupId;
+        Instant timeCreated = this.timeCreated;
         // If profile is public then set private info, otherwise - null
         if (this.communityVisibilityState == UserVisibility.PUBLIC) {
             primaryGroupId = profile.getPrimaryGroupId();
