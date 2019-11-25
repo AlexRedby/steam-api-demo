@@ -4,6 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.Duration;
 import java.util.List;
 
@@ -11,8 +12,9 @@ import java.util.List;
 @Table(name = "USER_APPLICATIONS", uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "application_id"}))
 @NoArgsConstructor
 @Data
-public class UserApplication {
+public class UserApplication implements Serializable {
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false, updatable = false)
     private Long id;
 

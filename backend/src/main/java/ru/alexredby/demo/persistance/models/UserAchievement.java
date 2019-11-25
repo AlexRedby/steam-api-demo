@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import ru.alexredby.demo.persistance.models.Ids.UserAchievementId;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Entity
@@ -12,7 +13,7 @@ import java.time.LocalDateTime;
 @IdClass(UserAchievementId.class)
 @NoArgsConstructor
 @Data
-public class UserAchievement {
+public class UserAchievement implements Serializable {
     // TODO: Mb change to eager
     @Id
     @ManyToOne(fetch = FetchType.LAZY)

@@ -29,6 +29,10 @@ public class ApplicationDataService {
         return applicationRepository.findAllById(ids);
     }
 
+    public Application save(Application application) {
+        return applicationRepository.save(application);
+    }
+
     public List<Application> saveAll(List<Application> applications) {
         return applicationRepository.saveAll(applications);
     }

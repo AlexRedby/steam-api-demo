@@ -8,6 +8,7 @@ import ru.alexredby.demo.utils.StringUtils;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
+import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -18,7 +19,7 @@ import java.util.List;
 @Table(name = "USERS")
 @NoArgsConstructor
 @Data
-public class User {
+public class User implements Serializable {
     /** 64bit Steam Id */
     @Id
     @Column(nullable = false, updatable = false)

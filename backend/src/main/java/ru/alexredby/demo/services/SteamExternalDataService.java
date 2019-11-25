@@ -4,6 +4,7 @@ import com.ibasco.agql.protocols.valve.steam.webapi.SteamWebApiClient;
 import com.ibasco.agql.protocols.valve.steam.webapi.interfaces.SteamPlayerService;
 import com.ibasco.agql.protocols.valve.steam.webapi.interfaces.SteamStorefront;
 import com.ibasco.agql.protocols.valve.steam.webapi.interfaces.SteamUser;
+import com.ibasco.agql.protocols.valve.steam.webapi.interfaces.SteamUserStats;
 import com.ibasco.agql.protocols.valve.steam.webapi.pojos.SteamPlayerOwnedGame;
 import com.ibasco.agql.protocols.valve.steam.webapi.pojos.SteamPlayerProfile;
 import com.ibasco.agql.protocols.valve.steam.webapi.pojos.StoreAppDetails;
@@ -11,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.alexredby.demo.enums.UserVisibility;
 import ru.alexredby.demo.exceptions.UserNotFoundException;
+import ru.alexredby.demo.persistance.models.Achievement;
 import ru.alexredby.demo.persistance.models.Application;
 import ru.alexredby.demo.persistance.models.User;
 import ru.alexredby.demo.persistance.services.ApplicationDataService;
@@ -38,6 +40,7 @@ public class SteamExternalDataService {
     private SteamUser steamUser;
     private SteamPlayerService steamPlayerService;
     private SteamStorefront steamStorefront;
+    private SteamUserStats steamUserStats;
 
     private UserDataService userDataService;
     private ApplicationDataService applicationDataService;
@@ -50,9 +53,11 @@ public class SteamExternalDataService {
     ) {
         this.userDataService = userDataService;
         this.applicationDataService = applicationDataService;
+
         this.steamUser = new SteamUser(steamWebApiClient);
         this.steamPlayerService = new SteamPlayerService(steamWebApiClient);
         this.steamStorefront = new SteamStorefront(steamWebApiClient);
+        this.steamUserStats = new SteamUserStats(steamWebApiClient);
     }
 
     /**
@@ -78,7 +83,6 @@ public class SteamExternalDataService {
         user.update(profile);
 
         updateGamesOf(user);
-        // Что делать если пришло, например, 5000 игр? проверять их наличие в БД или нет?
 
         // Change lastUpdate before save in DB
         user.setLastUpdate(LocalDateTime.now(ZoneId.of("UTC")));
@@ -93,9 +97,10 @@ public class SteamExternalDataService {
      *
      * @param user whose games need to be updated
      */
+    // TODO: lunch this on background and return info to user immediately
     private void updateGamesOf(@NotNull User user) {
         // Check if profile is public. If it is - update, otherwise do nothing
-        if(user.getCommunityVisibilityState() == UserVisibility.PUBLIC) {
+        if (user.getCommunityVisibilityState() == UserVisibility.PUBLIC) {
             CompletableFuture<List<SteamPlayerOwnedGame>> gamesFuture = null;
             // Check if 2 weeks passed after last update
             if (ChronoUnit.WEEKS.between(user.getLastUpdate(), LocalDateTime.now()) >= 2) {
@@ -103,33 +108,65 @@ public class SteamExternalDataService {
             } else {
                 // Count = 0 means all games
                 gamesFuture = steamPlayerService.getRecentlyPlayedGames(user.getId(), 0).thenApply(list ->
-                        list.stream()
+                        list == null ? null : list.stream()
                                 .map(SteamUtils::convertRecentGamesToOwned)
                                 .collect(Collectors.toList())
                 );
             }
+            @Nullable
             List<SteamPlayerOwnedGame> games = gamesFuture.join();
 
-            List<Application> existingApplications = applicationDataService.findAllById(
-                    games.stream()
-                            .map(SteamPlayerOwnedGame::getAppId)
-                            .collect(Collectors.toList())
-            );
+            // TODO: Replace it
+            if (games != null) {
+                // Checks if game already in DB
+                List<Application> existingApplications = applicationDataService.findAllById(
+                        games.stream()
+                                .map(SteamPlayerOwnedGame::getAppId)
+                                .collect(Collectors.toList())
+                );
 
-            // Check if this games exists in DB
-            List<Application> applications = games.stream()
-                    .filter(g -> existingApplications.stream().noneMatch(app -> app.getId() == g.getAppId()))
-                    .map(g -> {
-                        @Nullable
-                        StoreAppDetails appDetails = steamStorefront.getAppDetails(g.getAppId()).join();
-                        return appDetails != null
-                                ? new Application(appDetails)
-                                : new Application(g);
-                    })
-                    .collect(Collectors.toList());
-            // TODO: save to user and allow it make cascade save
-            if(!applications.isEmpty())
-                applicationDataService.saveAll(applications);
+                // Deletes games found in DB from list
+                existingApplications.forEach(app -> games.removeIf(g -> app.getId() == g.getAppId()));
+
+                // Gets new game from Steam Api and map them in Application list
+                List<Application> newApplications = games.stream()
+                        .map(g -> {
+                            @Nullable
+                            StoreAppDetails appDetails = steamStorefront.getAppDetails(g.getAppId()).join();
+                            Application application = appDetails != null
+                                    ? new Application(appDetails)
+                                    : new Application(g);
+                            if (application.isHasAchievements()) updateAchievementsOf(application);
+                            return application;
+                        }).filter(Application::isHasAchievements)
+                        .collect(Collectors.toList());
+
+                // TODO: save to user and allow it make cascade save
+                if (!newApplications.isEmpty())
+                    //newApplications.forEach(app -> applicationDataService.save(app));
+                    applicationDataService.saveAll(newApplications);
+            }
+        }
+    }
+
+    private void updateAchievementsOf(@NotNull Application application) {
+        @Nullable
+        final var statsAndAchievements = steamUserStats.getSchemaForGame(application.getId()).join();
+
+        if(statsAndAchievements != null) {
+            final var percentages = steamUserStats.getGlobalAchievementPercentagesForApp(application.getId()).join();
+            var achievements = statsAndAchievements.getAchievementSchemaList().stream()
+                    .map(ach -> {
+                        var foundPercentage = percentages.stream()
+                                .filter(per -> per.getName().equals(ach.getName()))
+                                .findFirst()
+                                .orElse(null);
+                        return foundPercentage != null
+                                ? new Achievement(application, ach, foundPercentage.getPercentage())
+                                : new Achievement(application, ach, 0);
+                    }).collect(Collectors.toList());
+
+            application.setAchievements(achievements);
         }
     }
 }

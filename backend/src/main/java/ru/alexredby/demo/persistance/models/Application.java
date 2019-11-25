@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 // TODO: more data such achievements
@@ -13,7 +15,7 @@ import java.util.List;
 @Table(name = "APPLICATIONS")
 @NoArgsConstructor
 @Data
-public class Application {
+public class Application implements Serializable {
     @Id
     @Column(nullable = false, updatable = false)
     private int id;
@@ -21,22 +23,34 @@ public class Application {
     @Column(nullable = false)
     private String name;
 
-    @OneToMany(fetch = FetchType.LAZY, mappedBy = "application")
+    @Column(nullable = false)
+    private boolean hasAchievements;
+
+    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "application")
     private List<Achievement> achievements;
 
     public Application(StoreAppDetails app) {
         this.id = app.getAppId();
         this.name = app.getName();
+        this.hasAchievements = app.getAchievements().getTotal() > 0;
+        this.achievements = new ArrayList<>();
     }
 
     /**
-     * Warning: Not recommended to use,
-     *          only if steam store didn't return game
+     * Warning: Not recommended to use, only if steam store didn't return game(removed from it)
      *
      * @param app
      */
     public Application(SteamPlayerOwnedGame app) {
         this.id = app.getAppId();
         this.name = app.getName();
+        // TODO: Sometimes it can have achievement
+        this.hasAchievements = false;
+        this.achievements = new ArrayList<>();
+    }
+
+    public void setAchievements(List<Achievement> achievements) {
+        achievements.forEach(a -> a.setApplication(this));
+        this.achievements = achievements;
     }
 }
