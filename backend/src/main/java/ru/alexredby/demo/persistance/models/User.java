@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
 
 // TODO: make common class with id mb? research this question
 @Entity
@@ -63,6 +64,12 @@ public class User {
      */
     @Column(nullable = false)
     private LocalDateTime lastUpdate;
+
+    /**
+     * List of user's applications with achievements and totalPlaytime
+     */
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "user")
+    private List<UserApplication> applications;
 
     /**
      * Constructor for User if known only id

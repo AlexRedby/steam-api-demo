@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.*;
+import java.util.List;
 
 // TODO: more data such achievements
 @Entity
@@ -16,8 +17,12 @@ public class Application {
     @Id
     @Column(nullable = false, updatable = false)
     private int id;
+
     @Column(nullable = false)
     private String name;
+
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "application")
+    private List<Achievement> achievements;
 
     public Application(StoreAppDetails app) {
         this.id = app.getAppId();
@@ -31,7 +36,6 @@ public class Application {
      * @param app
      */
     public Application(SteamPlayerOwnedGame app) {
-        System.out.println(app);
         this.id = app.getAppId();
         this.name = app.getName();
     }
