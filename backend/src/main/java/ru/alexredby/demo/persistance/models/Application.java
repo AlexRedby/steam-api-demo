@@ -26,7 +26,7 @@ public class Application implements Serializable {
     @Column(nullable = false)
     private boolean hasAchievements;
 
-    @OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.PERSIST, mappedBy = "application")
+    @OneToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE}, mappedBy = "application")
     private List<Achievement> achievements;
 
     public Application(StoreAppDetails app) {

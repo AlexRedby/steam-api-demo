@@ -21,7 +21,7 @@ public class UserAchievement implements Serializable {
     private UserApplication userApplication;
 
     @Id
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "achievement_id", nullable = false, updatable = false)
     private Achievement achievement;
 

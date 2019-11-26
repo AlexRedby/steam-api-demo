@@ -19,3 +19,8 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.H2Dialect
         connection: UTF-8
+        # Try if it works on real DB
+        order_inserts: true
+        order_updates: true
+        jdbc:
+          batch-size: 100

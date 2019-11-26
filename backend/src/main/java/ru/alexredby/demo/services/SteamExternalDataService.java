@@ -138,8 +138,7 @@ public class SteamExternalDataService {
                                     : new Application(g);
                             if (application.isHasAchievements()) updateAchievementsOf(application);
                             return application;
-                        }).filter(Application::isHasAchievements)
-                        .collect(Collectors.toList());
+                        }).collect(Collectors.toList());
 
                 // TODO: save to user and allow it make cascade save
                 if (!newApplications.isEmpty())
