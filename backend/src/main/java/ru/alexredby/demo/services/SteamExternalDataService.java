@@ -126,11 +126,18 @@ public class SteamExternalDataService {
                 );
 
                 // Deletes games found in DB from list
-                existingApplications.forEach(app -> games.removeIf(g -> app.getId() == g.getAppId()));
+                existingApplications.forEach(app -> games.removeIf(g -> {
+                    if(app.getId() == g.getAppId()) {
+                        // TODO: create UserApplication here
+                        return true;
+                    }
+                    return false;
+                }));
 
                 // Gets new game from Steam Api and map them in Application list
                 List<Application> newApplications = games.stream()
                         .map(g -> {
+                            // TODO: and create UserApplication here
                             @Nullable
                             StoreAppDetails appDetails = steamStorefront.getAppDetails(g.getAppId()).join();
                             Application application = appDetails != null
@@ -140,10 +147,9 @@ public class SteamExternalDataService {
                             return application;
                         }).collect(Collectors.toList());
 
-                // TODO: save to user and allow it make cascade save
                 if (!newApplications.isEmpty())
                     //newApplications.forEach(app -> applicationDataService.save(app));
-                    applicationDataService.saveAll(newApplications);
+                    newApplications = applicationDataService.saveAll(newApplications);
             }
         }
     }

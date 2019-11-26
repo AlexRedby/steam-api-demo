@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.ArrayList;
 import java.util.List;
 
 // TODO: make common class with id mb? research this question
@@ -81,6 +82,7 @@ public class User implements Serializable {
         this.primaryGroupId = null;
         this.timeCreated = null;
         this.lastUpdate = LocalDateTime.MIN;
+        this.applications = new ArrayList<>();
     }
 
     /**

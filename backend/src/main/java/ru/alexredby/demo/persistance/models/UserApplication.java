@@ -1,5 +1,6 @@
 package ru.alexredby.demo.persistance.models;
 
+import com.ibasco.agql.protocols.valve.steam.webapi.pojos.SteamPlayerOwnedGame;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -31,4 +32,8 @@ public class UserApplication implements Serializable {
 
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "userApplication")
     private List<UserAchievement> achievements;
+
+    public UserApplication(SteamPlayerOwnedGame ownedGame) {
+        this.totalPlaytime = Duration.ofMinutes(ownedGame.getTotalPlaytime());
+    }
 }
