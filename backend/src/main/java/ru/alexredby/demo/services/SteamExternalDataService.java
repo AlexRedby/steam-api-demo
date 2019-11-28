@@ -114,44 +114,57 @@ public class SteamExternalDataService {
                 );
             }
             @Nullable
-            List<SteamPlayerOwnedGame> games = gamesFuture.join();
+            List<SteamPlayerOwnedGame> gamesNeedLoad = gamesFuture.join();
 
-            // TODO: Replace it
-            if (games != null) {
+            if (gamesNeedLoad != null) {
+                var userApplications = user.getApplications();
+
                 // Checks if game already in DB
                 List<Application> existingApplications = applicationDataService.findAllById(
-                        games.stream()
+                        gamesNeedLoad.stream()
                                 .map(SteamPlayerOwnedGame::getAppId)
                                 .collect(Collectors.toList())
                 );
 
                 // Deletes games found in DB from list
-                existingApplications.forEach(app -> games.removeIf(g -> {
-                    if(app.getId() == g.getAppId()) {
-                        // TODO: create UserApplication here
+                existingApplications.forEach(app -> gamesNeedLoad.removeIf(g -> {
+                    if (app.getId() == g.getAppId()) {
+                        //userApplications.add(new UserApplication(user, app, g.getTotalPlaytime()));
                         return true;
                     }
                     return false;
                 }));
 
                 // Gets new game from Steam Api and map them in Application list
-                List<Application> newApplications = games.stream()
-                        .map(g -> {
-                            // TODO: and create UserApplication here
-                            @Nullable
-                            StoreAppDetails appDetails = steamStorefront.getAppDetails(g.getAppId()).join();
-                            Application application = appDetails != null
-                                    ? new Application(appDetails)
-                                    : new Application(g);
-                            if (application.isHasAchievements()) updateAchievementsOf(application);
-                            return application;
-                        }).collect(Collectors.toList());
-
-                if (!newApplications.isEmpty())
-                    //newApplications.forEach(app -> applicationDataService.save(app));
-                    newApplications = applicationDataService.saveAll(newApplications);
+                List<Application> newApplications = saveNewApplications(gamesNeedLoad);
             }
         }
+    }
+
+    /**
+     * Saves newly found games from steam to inner DB
+     *
+     * @param newGames a list of not yet stored in DB games
+     * @return a list of application already saved in DB
+     */
+    // TODO: Add to separate transaction
+    private List<Application> saveNewApplications(List<SteamPlayerOwnedGame> newGames) {
+        List<Application> newApplications = newGames.stream()
+                .map(g -> {
+                    @Nullable
+                    StoreAppDetails appDetails = steamStorefront.getAppDetails(g.getAppId()).join();
+                    Application application = appDetails != null
+                            ? new Application(appDetails)
+                            : new Application(g);
+                    if (application.isHasAchievements()) updateAchievementsOf(application);
+                    return application;
+                }).collect(Collectors.toList());
+
+        if (!newApplications.isEmpty()) {
+            newApplications = applicationDataService.saveAll(newApplications);
+        }
+
+        return newApplications;
     }
 
     private void updateAchievementsOf(@NotNull Application application) {

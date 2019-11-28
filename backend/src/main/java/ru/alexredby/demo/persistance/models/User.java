@@ -137,4 +137,9 @@ public class User implements Serializable {
     public String getFullAvatar() {
         return String.join("_full.", StringUtils.splitByLast(smallAvatar, "."));
     }
+
+    public void setApplications(List<UserApplication> applications) {
+        applications.forEach(a -> a.setUser(this));
+        this.applications = applications;
+    }
 }

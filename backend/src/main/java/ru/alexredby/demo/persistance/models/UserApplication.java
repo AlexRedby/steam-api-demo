@@ -33,7 +33,16 @@ public class UserApplication implements Serializable {
     @OneToMany(fetch = FetchType.LAZY, mappedBy = "userApplication")
     private List<UserAchievement> achievements;
 
-    public UserApplication(SteamPlayerOwnedGame ownedGame) {
-        this.totalPlaytime = Duration.ofMinutes(ownedGame.getTotalPlaytime());
+    /**
+     * Constructor for creating new connection between user and application
+     *
+     * @param user who have this application
+     * @param application to connect with user
+     * @param totalPlaytime how many minutes user play in this game
+     */
+    public UserApplication(User user, Application application, int totalPlaytime) {
+        this.user = user;
+        this.application = application;
+        this.totalPlaytime = Duration.ofMinutes(totalPlaytime);
     }
 }
